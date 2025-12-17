@@ -6,7 +6,7 @@
 #include <string.h> 
 #include <ctype.h>
 
-#define PATH "/tmp/uds_upper_e.kubanychbek.sock"
+#define PATH "/tmp/uds_upper_e_kubanychbek.sock"
 
 int main(){
     int listenfd; //слушающий сокет сервера
