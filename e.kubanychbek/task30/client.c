@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <string.h>
 
-#define PATH "/tmp/uds_upper.sock_e_kubanychbek"
+#define PATH "/tmp/uds_upper_e_kubanychbek.sock"
 
 int main(){
     int fd;

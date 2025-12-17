@@ -19,7 +19,7 @@ int main(){
 
     memset(&addr, 0, sizeof(addr));
     addr.sun_family = AF_UNIX; 
-    strncpy(addr.sun_path, PATH, sizeof(addr.sun_family) - 1);
+    strncpy(addr.sun_path, PATH, sizeof(addr.sun_path) - 1);
 
     bind(fd, (struct sockaddr*)&addr, sizeof(addr)); 
     listen(fd, 1);
@@ -28,8 +28,8 @@ int main(){
     while ((n = read(cfd, buf, sizeof(buf))) > 0){
         for (i = 0; i < n; i++){
             buf[i] = (char)toupper((unsigned char)buf[i]);
-        write(1, buf, n);
         }
+        write(1, buf, n);
     }
     close(cfd);
     close(fd);
