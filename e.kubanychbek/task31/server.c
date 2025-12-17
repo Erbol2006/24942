@@ -76,7 +76,9 @@ int main(){
                     start_ns[i] = gethrtime(); 
                     
                     total_bytes[i] = 0; 
-                    dprintf(2, "[fd=%d] connect\n", cfd);
+                    fprintf(stderr, "[fd=%d] connect\n", cfd);
+                    fflush(stderr);
+
                     break;
                 }
             }
@@ -96,8 +98,10 @@ int main(){
 
                 if (n <= 0){ //n == 0 -> клиент щакрылся, а если n < 0 то это просто ошибка
                     hrtime_t end = gethrtime();
-                    dprintf(2, "[fd=%d] disconnect, bytes=%lld, conn_time=%lld ns\n",
-                            fd, total_bytes[i], (long long)(end - start_ns[i]));
+                    fprintf(stderr, "[fd=%d] disconnect, bytes=%lld, conn_time=%lld ns\n",
+                        fd, total_bytes[i], (long long)(end - start_ns[i]));
+                    fflush(stderr);
+
                     close (fd);
                     clients[i] = -1; 
                 } else {
@@ -109,8 +113,10 @@ int main(){
                     }
                     write(1, buf, n);
                     hrtime_t t1 = gethrtime();
-                    dprintf(2, "[fd=%d] chunk=%d bytes, work=%lld ns\n",
-                            fd, n, (long long)(t1 - t0));
+                    fprintf(stderr, "[fd=%d] chunk=%d bytes, work=%lld ns\n",
+                        fd, n, (long long)(t1 - t0));
+                    fflush(stderr);
+
                 }
             }
         }
