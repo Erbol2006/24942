@@ -19,7 +19,7 @@ int main(){
 
     memset(&addr, 0, sizeof(addr));
     addr.sun_family = AF_UNIX; 
-    strncpy(addr.sun_path, PATH, size_of(addr.sun_family) - 1);
+    strncpy(addr.sun_path, PATH, sizeof(addr.sun_family) - 1);
 
     bind(fd, (struct sockaddr*)&addr, sizeof(addr)); 
     listen(fd, 1);
