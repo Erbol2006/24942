@@ -1,4 +1,7 @@
+//cc server.c -o server -lsocket -lnsl
+
 #include <sys/types.h> 
+
 #include <sys/socket.h> 
 #include <sys/un.h>
 #include <sys/select.h>
@@ -6,6 +9,8 @@
 #include <string.h> 
 #include <ctype.h>
 
+#include <stdio.h> 
+#include <sys/time.h>
 #define PATH "/tmp/uds_upper_e_kubanychbek.sock"
 
 int main(){
@@ -17,6 +22,9 @@ int main(){
     int maxfd; // макс. fd в наборе 
     int n; //сколько байт прочитали 
     char buf[4000];
+
+    hrtime_t start_ns[FD_SETSIZE];
+    long long total_bytes[FD_SETSIZE];
 
     listenfd = socket(AF_UNIX, SOCK_STREAM, 0);
 
@@ -34,6 +42,8 @@ int main(){
     //у нас изначально клиентов нет
     for (i = 0; i < FD_SETSIZE; i++){
         clients[i] = -1;//<- поэтому слот пустой
+        start_ns[i] = 0;
+        total_bytes[i] = 0;
     }
     for (;;) {//запускакм бесконечный цико обслуживания
         fd_set rfds; //набор fd за которыми следим для чтения
@@ -63,6 +73,10 @@ int main(){
             for (i = 0; i < FD_SETSIZE; i++){
                 if (clients[i] == -1){
                     clients[i] = cfd;//запоминаем fd клиента 
+                    start_ns[i] = gethrtime(); 
+                    
+                    total_bytes[i] = 0; 
+                    dprintf(2, "[fd=%d] connect\n", cfd);
                     break;
                 }
             }
@@ -81,15 +95,22 @@ int main(){
                 n = read(fd, buf, sizeof(buf));
 
                 if (n <= 0){ //n == 0 -> клиент щакрылся, а если n < 0 то это просто ошибка
+                    hrtime_t end = gethrtime();
+                    dprintf(2, "[fd=%d] disconnect, bytes=%lld, conn_time=%lld ns\n",
+                            fd, total_bytes[i], (long long)(end - start_ns[i]));
                     close (fd);
                     clients[i] = -1; 
                 } else {
                     int k; //индекс по байтам полученного блока
-
+                    hrtime_t t0 = gethrtime();
+                    total_bytes[i] += n;
                     for (k = 0; k < n; k++){
                         buf[k] = (char)toupper((unsigned char)buf[k]);
                     }
                     write(1, buf, n);
+                    hrtime_t t1 = gethrtime();
+                    dprintf(2, "[fd=%d] chunk=%d bytes, work=%lld ns\n",
+                            fd, n, (long long)(t1 - t0));
                 }
             }
         }
